@@ -11,8 +11,6 @@ use std::path::Path;
 use derive_more::Display;
 use std::collections::HashSet;
 
-extern crate derive_more;
-
 fn main() {
     print!("{}", ps1());
 }
