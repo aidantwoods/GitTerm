@@ -14,15 +14,15 @@ use crate::git_term::{
 #[clap(author, version, about, long_about = None)]
 struct Args {
     /// Only generate the path and git info section
-    #[clap(long, value_parser)]
+    #[clap(short, long, value_parser)]
     minimal: bool,
 
     /// Color of working directory
-    #[clap(long, value_parser, default_value = "blue")]
+    #[clap(short, long, value_parser, default_value = "blue")]
     work_dir_color: Color,
 
     /// Color of git status
-    #[clap(long, value_parser, default_value = "yellow")]
+    #[clap(short, long, value_parser, default_value = "yellow")]
     git_status_color: Color,
 }
 
