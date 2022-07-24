@@ -23,7 +23,7 @@ struct Args {
     #[clap(long, value_parser, default_value = "blue")]
     path_color: Color,
 
-    /// Color of path section
+    /// Color of git status section
     #[clap(long, value_parser, default_value = "yellow")]
     git_status_color: Color,
 }
