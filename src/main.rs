@@ -2,12 +2,11 @@
 
 pub mod git_term;
 
-use derive_more::Display;
 use clap::Parser;
 
 use crate::git_term::{
+    bash::PromptCommand,
     coloring::{
-        ColoredPathAndInfo,
         PathAndInfoColors,
         Color
     },
@@ -47,10 +46,6 @@ fn main() {
         print!("{}", PromptCommand(path_and_info))
     }
 }
-
-#[derive(Display, Debug)]
-#[display(fmt = r"\[\033[m\]\u:{}\[\033[m\]\$ ", _0)]
-struct PromptCommand(ColoredPathAndInfo);
 
 
 
