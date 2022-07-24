@@ -1,10 +1,12 @@
 #![feature(try_trait_v2)]
 
-pub mod git_term;
+pub mod cmd;
+pub mod coloring;
+pub mod git;
 
 use clap::Parser;
 
-use crate::git_term::{
+use crate::{
     cmd::Prompt,
     coloring::{Color, OutputColoring},
     git::path_and_info,

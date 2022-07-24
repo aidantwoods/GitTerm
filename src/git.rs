@@ -9,7 +9,7 @@ use std::hash::Hash;
 use std::path::Path;
 use std::process::Command;
 
-pub fn git_statuses() -> Option<Statuses> {
+fn git_statuses() -> Option<Statuses> {
     let output = Command::new("git")
         .arg("status")
         .arg("--porcelain")
@@ -38,7 +38,7 @@ pub fn git_statuses() -> Option<Statuses> {
     Some(Statuses(HashSet::from_iter(statuses)))
 }
 
-pub fn relative_git_dir() -> Option<Directory> {
+fn relative_git_dir() -> Option<Directory> {
     let current_dir = env::current_dir().ok()?;
     let current_path = Path::new(&current_dir);
 
