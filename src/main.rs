@@ -5,7 +5,7 @@ pub mod git_term;
 use clap::Parser;
 
 use crate::git_term::{
-    cmd::PromptCommand,
+    cmd::Prompt,
     coloring::{Color, OutputColoring},
     git::path_and_info,
 };
@@ -43,6 +43,6 @@ fn main() {
     if args.minimal {
         print!("{}", path_and_info)
     } else {
-        print!("{}", PromptCommand(path_and_info))
+        print!("{}", Prompt(path_and_info))
     }
 }
