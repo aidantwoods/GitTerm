@@ -28,9 +28,9 @@ pub enum Color {
 }
 
 #[derive(Debug)]
-pub struct PathAndInfoColors {
+pub struct OutputColoring {
     pub path: Color,
-    pub info: Color,
+    pub git_status: Color,
 }
 
 #[derive(Display, Debug)]
@@ -41,14 +41,14 @@ pub struct ColoredDirectory(pub Directory, pub Color);
 pub struct ColoredStatuses(pub Statuses, pub Color);
 
 #[derive(Debug)]
-pub struct ColoredPathAndInfo(pub PathAndInfo, pub PathAndInfoColors);
+pub struct ColoredPathAndInfo(pub PathAndInfo, pub OutputColoring);
 
 impl Display for ColoredPathAndInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
             PathAndInfo::Git(dir, git_status) =>  {
                 write!(f, "{}{} ", self.1.path, dir)?;
-                write!(f, "{}{}", self.1.info, git_status)
+                write!(f, "{}{}", self.1.git_status, git_status)
             },
             PathAndInfo::Fallback => write!(f, r"{}\w ", self.1.path),
         }
@@ -56,7 +56,7 @@ impl Display for ColoredPathAndInfo {
 }
 
 impl PathAndInfo {
-    pub fn into_colored(self, colors: PathAndInfoColors) -> ColoredPathAndInfo {
+    pub fn into_colored(self, colors: OutputColoring) -> ColoredPathAndInfo {
         ColoredPathAndInfo(self, colors)
     }
 }
