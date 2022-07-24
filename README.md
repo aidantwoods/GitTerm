@@ -5,7 +5,7 @@
 
 Run:
 ```bash
-make build
+make install
 ```
 
 Copy the given line into .bashrc or .bash_profile
