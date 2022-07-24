@@ -58,7 +58,7 @@ impl Display for ColoredPathAndInfo {
         match &self.0 {
             PathAndInfo::Git(dir, git_status) => {
                 write!(f, "%B{}{}%b ", self.1.work_dir, dir)?;
-                write!(f, "{}{}", self.1.git_status, git_status)
+                write!(f, "%B{}{}%b", self.1.git_status, git_status)
             }
             PathAndInfo::Fallback => write!(f, r"%B{}%~%b ", self.1.work_dir),
         }
