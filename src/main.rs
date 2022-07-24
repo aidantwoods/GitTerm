@@ -5,7 +5,7 @@ pub mod git_term;
 use clap::Parser;
 
 use crate::git_term::{
-    bash::PromptCommand,
+    cmd::PromptCommand,
     coloring::{Color, OutputColoring},
     git::path_and_info,
 };
