@@ -10,4 +10,8 @@ Run:
 make install
 ```
 
-Copy the given line into .zshrc
+Place the following in `.zshrc` to enable:
+
+```
+precmd() { eval $(git-term) }
+```
