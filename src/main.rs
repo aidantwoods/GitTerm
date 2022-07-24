@@ -48,7 +48,7 @@ struct PromptCommand(PathAndInfo);
 enum PathAndInfo {
     #[display(fmt = r"{} {}", _0, _1)]
     Git(Directory, Statuses),
-    #[display(fmt = r"\w  ")]
+    #[display(fmt = r"\w ")]
     Fallback,
 }
 
