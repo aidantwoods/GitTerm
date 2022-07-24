@@ -29,7 +29,7 @@ struct Args {
 impl Args {
     fn colors(&self) -> OutputColoring {
         OutputColoring {
-            path: self.work_dir_color,
+            work_dir: self.work_dir_color,
             git_status: self.git_status_color,
         }
     }

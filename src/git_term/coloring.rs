@@ -25,7 +25,7 @@ pub enum Color {
 
 #[derive(Debug)]
 pub struct OutputColoring {
-    pub path: Color,
+    pub work_dir: Color,
     pub git_status: Color,
 }
 
@@ -43,10 +43,10 @@ impl Display for ColoredPathAndInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
             PathAndInfo::Git(dir, git_status) => {
-                write!(f, "{}{} ", self.1.path, dir)?;
+                write!(f, "{}{} ", self.1.work_dir, dir)?;
                 write!(f, "{}{}", self.1.git_status, git_status)
             }
-            PathAndInfo::Fallback => write!(f, r"{}\w ", self.1.path),
+            PathAndInfo::Fallback => write!(f, r"{}\w ", self.1.work_dir),
         }
     }
 }
