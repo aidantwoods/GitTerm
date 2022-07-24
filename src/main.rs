@@ -28,10 +28,19 @@ struct Args {
     git_status_color: Color,
 }
 
+impl Args {
+    fn path_and_info_colors(&self) -> PathAndInfoColors {
+        PathAndInfoColors(self.path_color, self.git_status_color)
+    }
+}
+
+#[derive(Debug)]
+struct PathAndInfoColors(Color, Color);
+
 fn main() {
     let args = Args::parse();
 
-    let path_and_info = path_and_info(&args);
+    let path_and_info = path_and_info().into_colored(&args);
 
     if args.path_and_info_only {
         print!("{}", path_and_info)
@@ -42,19 +51,38 @@ fn main() {
 
 #[derive(Display, Debug)]
 #[display(fmt = r"\[\033[m\]\u:{}\[\033[m\]\$ ", _0)]
-struct PromptCommand(PathAndInfo);
+struct PromptCommand(ColoredPathAndInfo);
 
-#[derive(Display, Debug)]
+#[derive(Debug)]
+struct ColoredPathAndInfo(PathAndInfo, PathAndInfoColors);
+
+impl Display for ColoredPathAndInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.0 {
+            PathAndInfo::Git(dir, git_status) =>  {
+                write!(f, "{}{} ", self.1.0, dir)?;
+                write!(f, "{}{}", self.1.1, git_status)
+            },
+            PathAndInfo::Fallback => write!(f, r"{}\w ", self.1.0),
+        }
+    }
+}
+
+#[derive(Debug)]
 enum PathAndInfo {
-    #[display(fmt = r"{} {}", _0, _1)]
     Git(Directory, Statuses),
-    #[display(fmt = r"\w ")]
     Fallback,
 }
 
 impl FromResidual<Option<Infallible>> for PathAndInfo {
     fn from_residual(_: Option<Infallible>) -> Self {
         PathAndInfo::Fallback
+    }
+}
+
+impl PathAndInfo {
+    fn into_colored(self, args: &Args) -> ColoredPathAndInfo {
+        ColoredPathAndInfo(self, args.path_and_info_colors())
     }
 }
 
@@ -80,7 +108,11 @@ enum Color {
 
 #[derive(Display, Debug)]
 #[display(fmt = r"{}{}", _1, _0)]
-struct Directory(String, Color);
+struct ColoredDirectory(Directory, Color);
+
+#[derive(Display, Debug)]
+#[display(fmt = r"{}", _0)]
+struct Directory(String);
 
 #[derive(Display, Debug, PartialEq, Eq, Copy, Clone, Hash, PartialOrd, Ord)]
 enum Status {
@@ -95,15 +127,16 @@ enum Status {
 }
 
 #[derive(Debug)]
-struct Statuses(HashSet<Status>, Color);
+struct ColoredStatuses(Statuses, Color);
+
+#[derive(Debug)]
+struct Statuses(HashSet<Status>);
 
 impl Display for Statuses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut statuses = self.0.iter().collect::<Vec<_>>();
 
         statuses.sort();
-
-        write!(f, "{}", self.1)?;
 
         for status in statuses {
             write!(f, "{}", status)?;
@@ -113,11 +146,11 @@ impl Display for Statuses {
     }
 }
 
-fn path_and_info(args: &Args) -> PathAndInfo {
-    PathAndInfo::Git(relative_git_dir(args.path_color)?,  git_statuses(args.git_status_color)?)
+fn path_and_info() -> PathAndInfo {
+    PathAndInfo::Git(relative_git_dir()?,  git_statuses()?)
 }
 
-fn relative_git_dir(color: Color) -> Option<Directory> {
+fn relative_git_dir() -> Option<Directory> {
     let current_dir = env::current_dir().ok()?;
     let current_path = Path::new(&current_dir);
     
@@ -130,10 +163,10 @@ fn relative_git_dir(color: Color) -> Option<Directory> {
 
     let relative_git_path = current_path.strip_prefix(git_parent_path.to_str()?).ok()?;
 
-    Some(Directory(relative_git_path.to_str()?.to_string(), color))
+    Some(Directory(relative_git_path.to_str()?.to_string()))
 }
 
-fn git_statuses(color: Color) -> Option<Statuses> {
+fn git_statuses() -> Option<Statuses> {
     let output = Command::new("git")
         .arg("status")
         .arg("--porcelain")
@@ -154,5 +187,5 @@ fn git_statuses(color: Color) -> Option<Statuses> {
 
     let statuses = pairs.iter().filter(|p| p.1).map(|p|p.0);
 
-    Some(Statuses(HashSet::from_iter(statuses), color))
+    Some(Statuses(HashSet::from_iter(statuses)))
 }
