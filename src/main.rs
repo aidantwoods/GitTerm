@@ -19,8 +19,8 @@ fn main() {
 
 #[derive(Display, Debug)]
 enum Ps1 {
-    #[display(fmt = r"\[\033[m\]\u:{}{} {}{}\[\033[m\]\$ ", Color::Blue, _0, Color::Yellow, _1)]
-    Git(String, Statuses),
+    #[display(fmt = r"\[\033[m\]\u:{} {}\[\033[m\]\$ ", _0, _1)]
+    Git(Directory, Statuses),
     #[display(fmt = r"\[\033[m\]\u:{}\w \[\033[m\]\$ ", Color::Blue)]
     Fallback,
 }
@@ -38,6 +38,10 @@ enum Color {
     #[display(fmt = r"\[\033[33;1m\]")]
     Yellow,
 }
+
+#[derive(Display, Debug)]
+#[display(fmt = r"{}{}", Color::Blue, _0)]
+struct Directory(String);
 
 #[derive(Display, Debug, PartialEq, Eq, Copy, Clone, Hash, PartialOrd, Ord)]
 enum Status {
@@ -60,6 +64,8 @@ impl Display for Statuses {
 
         statuses.sort();
 
+        write!(f, "{}", Color::Yellow)?;
+
         for status in statuses {
             write!(f, "{}", status)?;
         }
@@ -72,7 +78,7 @@ fn ps1() -> Ps1 {
     Ps1::Git(relative_git_dir()?,  git_statuses()?)
 }
 
-fn relative_git_dir() -> Option<String> {
+fn relative_git_dir() -> Option<Directory> {
     let current_dir = env::current_dir().ok()?;
     let current_path = Path::new(&current_dir);
     
@@ -85,7 +91,7 @@ fn relative_git_dir() -> Option<String> {
 
     let relative_git_path = current_path.strip_prefix(git_parent_path.to_str()?).ok()?;
 
-    Some(relative_git_path.to_str()?.to_string())
+    Some(Directory(relative_git_path.to_str()?.to_string()))
 }
 
 fn git_statuses() -> Option<Statuses> {
