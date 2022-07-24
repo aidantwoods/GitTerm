@@ -1,6 +1,6 @@
 # GitTerm
 
-![usage](https://github.com/aidantwoods/GitTerm/raw/master/static/usage.png)
+![usage](https://github.com/aidantwoods/GitTerm/raw/main/static/usage.png)
 
 ## Installation
 
