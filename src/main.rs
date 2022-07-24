@@ -15,13 +15,13 @@ use crate::git_term::{
 struct Args {
     /// Only generate the path and git info section
     #[clap(long, value_parser)]
-    path_and_info_only: bool,
+    minimal: bool,
 
-    /// Color of path section
+    /// Color of working directory
     #[clap(long, value_parser, default_value = "blue")]
-    path_color: Color,
+    work_dir_color: Color,
 
-    /// Color of git status section
+    /// Color of git status
     #[clap(long, value_parser, default_value = "yellow")]
     git_status_color: Color,
 }
@@ -29,7 +29,7 @@ struct Args {
 impl Args {
     fn colors(&self) -> OutputColoring {
         OutputColoring {
-            path: self.path_color,
+            path: self.work_dir_color,
             git_status: self.git_status_color,
         }
     }
@@ -40,7 +40,7 @@ fn main() {
 
     let path_and_info = path_and_info().into_colored(args.colors());
 
-    if args.path_and_info_only {
+    if args.minimal {
         print!("{}", path_and_info)
     } else {
         print!("{}", PromptCommand(path_and_info))
