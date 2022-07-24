@@ -1,4 +1,3 @@
-
 use derive_more::Display;
 
 use super::coloring::ColoredPathAndInfo;

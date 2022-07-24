@@ -6,11 +6,8 @@ use clap::Parser;
 
 use crate::git_term::{
     bash::PromptCommand,
-    coloring::{
-        OutputColoring,
-        Color
-    },
-    git::path_and_info
+    coloring::{Color, OutputColoring},
+    git::path_and_info,
 };
 
 #[derive(Parser, Debug)]
@@ -31,7 +28,10 @@ struct Args {
 
 impl Args {
     fn colors(&self) -> OutputColoring {
-        OutputColoring{path: self.path_color, git_status: self.git_status_color}
+        OutputColoring {
+            path: self.path_color,
+            git_status: self.git_status_color,
+        }
     }
 }
 
@@ -46,9 +46,3 @@ fn main() {
         print!("{}", PromptCommand(path_and_info))
     }
 }
-
-
-
-
-
-

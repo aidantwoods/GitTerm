@@ -1,11 +1,7 @@
+use super::git::{Directory, PathAndInfo, Statuses};
 use clap::ArgEnum;
-use std::fmt::Display;
 use derive_more::Display;
-use super::git::{
-    PathAndInfo,
-    Directory,
-    Statuses,
-};
+use std::fmt::Display;
 
 #[derive(Display, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
 pub enum Color {
@@ -46,10 +42,10 @@ pub struct ColoredPathAndInfo(pub PathAndInfo, pub OutputColoring);
 impl Display for ColoredPathAndInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
-            PathAndInfo::Git(dir, git_status) =>  {
+            PathAndInfo::Git(dir, git_status) => {
                 write!(f, "{}{} ", self.1.path, dir)?;
                 write!(f, "{}{}", self.1.git_status, git_status)
-            },
+            }
             PathAndInfo::Fallback => write!(f, r"{}\w ", self.1.path),
         }
     }

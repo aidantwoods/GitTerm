@@ -1,3 +1,3 @@
-pub mod git;
-pub mod coloring;
 pub mod bash;
+pub mod coloring;
+pub mod git;
