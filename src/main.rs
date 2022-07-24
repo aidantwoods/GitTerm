@@ -10,36 +10,77 @@ use std::process::Command;
 use std::path::Path;
 use derive_more::Display;
 use std::collections::HashSet;
+use clap::{Parser, ArgEnum};
+
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+struct Args {
+    /// Only generate the path and git info section
+    #[clap(long, value_parser)]
+    path_and_info_only: bool,
+
+    /// Color of path section
+    #[clap(long, value_parser, default_value = "blue")]
+    path_color: Color,
+
+    /// Color of path section
+    #[clap(long, value_parser, default_value = "yellow")]
+    git_status_color: Color,
+}
 
 fn main() {
-    print!("{}", ps1());
-}
+    let args = Args::parse();
 
-#[derive(Display, Debug)]
-enum Ps1 {
-    #[display(fmt = r"\[\033[m\]\u:{} {}\[\033[m\]\$ ", _0, _1)]
-    Git(Directory, Statuses),
-    #[display(fmt = r"\[\033[m\]\u:{}\w \[\033[m\]\$ ", Color::Blue)]
-    Fallback,
-}
+    let path_and_info = path_and_info(&args);
 
-impl FromResidual<Option<Infallible>> for Ps1 {
-    fn from_residual(_: Option<Infallible>) -> Self {
-        Ps1::Fallback
+    if args.path_and_info_only {
+        print!("{}", path_and_info)
+    } else {
+        print!("{}", PromptCommand(path_and_info))
     }
 }
 
 #[derive(Display, Debug)]
+#[display(fmt = r"\[\033[m\]\u:{}\[\033[m\]\$ ", _0)]
+struct PromptCommand(PathAndInfo);
+
+#[derive(Display, Debug)]
+enum PathAndInfo {
+    #[display(fmt = r"{} {}", _0, _1)]
+    Git(Directory, Statuses),
+    #[display(fmt = r"\w  ")]
+    Fallback,
+}
+
+impl FromResidual<Option<Infallible>> for PathAndInfo {
+    fn from_residual(_: Option<Infallible>) -> Self {
+        PathAndInfo::Fallback
+    }
+}
+
+#[derive(Display, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
 enum Color {
-    #[display(fmt = r"\[\033[36;1m\]")]
-    Blue,
+    #[display(fmt = r"\[\033[30;1m\]")]
+    Black,
+    #[display(fmt = r"\[\033[31;1m\]")]
+    Red,
+    #[display(fmt = r"\[\033[32;1m\]")]
+    Green,
     #[display(fmt = r"\[\033[33;1m\]")]
     Yellow,
+    #[display(fmt = r"\[\033[34;1m\]")]
+    Blue,
+    #[display(fmt = r"\[\033[35;1m\]")]
+    Magenta,
+    #[display(fmt = r"\[\033[36;1m\]")]
+    Cyan,
+    #[display(fmt = r"\[\033[37;1m\]")]
+    White,
 }
 
 #[derive(Display, Debug)]
-#[display(fmt = r"{}{}", Color::Blue, _0)]
-struct Directory(String);
+#[display(fmt = r"{}{}", _1, _0)]
+struct Directory(String, Color);
 
 #[derive(Display, Debug, PartialEq, Eq, Copy, Clone, Hash, PartialOrd, Ord)]
 enum Status {
@@ -54,7 +95,7 @@ enum Status {
 }
 
 #[derive(Debug)]
-struct Statuses(HashSet<Status>);
+struct Statuses(HashSet<Status>, Color);
 
 impl Display for Statuses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -62,7 +103,7 @@ impl Display for Statuses {
 
         statuses.sort();
 
-        write!(f, "{}", Color::Yellow)?;
+        write!(f, "{}", self.1)?;
 
         for status in statuses {
             write!(f, "{}", status)?;
@@ -72,11 +113,11 @@ impl Display for Statuses {
     }
 }
 
-fn ps1() -> Ps1 {
-    Ps1::Git(relative_git_dir()?,  git_statuses()?)
+fn path_and_info(args: &Args) -> PathAndInfo {
+    PathAndInfo::Git(relative_git_dir(args.path_color)?,  git_statuses(args.git_status_color)?)
 }
 
-fn relative_git_dir() -> Option<Directory> {
+fn relative_git_dir(color: Color) -> Option<Directory> {
     let current_dir = env::current_dir().ok()?;
     let current_path = Path::new(&current_dir);
     
@@ -89,10 +130,10 @@ fn relative_git_dir() -> Option<Directory> {
 
     let relative_git_path = current_path.strip_prefix(git_parent_path.to_str()?).ok()?;
 
-    Some(Directory(relative_git_path.to_str()?.to_string()))
+    Some(Directory(relative_git_path.to_str()?.to_string(), color))
 }
 
-fn git_statuses() -> Option<Statuses> {
+fn git_statuses(color: Color) -> Option<Statuses> {
     let output = Command::new("git")
         .arg("status")
         .arg("--porcelain")
@@ -113,5 +154,5 @@ fn git_statuses() -> Option<Statuses> {
 
     let statuses = pairs.iter().filter(|p| p.1).map(|p|p.0);
 
-    Some(Statuses(HashSet::from_iter(statuses)))
+    Some(Statuses(HashSet::from_iter(statuses), color))
 }
