@@ -3,24 +3,38 @@ use clap::ArgEnum;
 use derive_more::Display;
 use std::fmt::Display;
 
-#[derive(Display, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
 pub enum Color {
-    #[display(fmt = r"\[\033[30;1m\]")]
     Black,
-    #[display(fmt = r"\[\033[31;1m\]")]
     Red,
-    #[display(fmt = r"\[\033[32;1m\]")]
     Green,
-    #[display(fmt = r"\[\033[33;1m\]")]
     Yellow,
-    #[display(fmt = r"\[\033[34;1m\]")]
     Blue,
-    #[display(fmt = r"\[\033[35;1m\]")]
     Magenta,
-    #[display(fmt = r"\[\033[36;1m\]")]
     Cyan,
-    #[display(fmt = r"\[\033[37;1m\]")]
     White,
+}
+
+impl Color {
+    fn name(&self) -> String {
+        match self {
+            Color::Black => "black",
+            Color::Red => "red",
+            Color::Green => "green",
+            Color::Yellow => "yellow",
+            Color::Blue => "blue",
+            Color::Magenta => "magenta",
+            Color::Cyan => "cyan",
+            Color::White => "white",
+        }
+        .to_string()
+    }
+}
+
+impl Display for Color {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "%F{{{}}}", self.name())
+    }
 }
 
 #[derive(Debug)]
@@ -43,10 +57,10 @@ impl Display for ColoredPathAndInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
             PathAndInfo::Git(dir, git_status) => {
-                write!(f, "{}{} ", self.1.work_dir, dir)?;
+                write!(f, "%B{}{}%b ", self.1.work_dir, dir)?;
                 write!(f, "{}{}", self.1.git_status, git_status)
             }
-            PathAndInfo::Fallback => write!(f, r"{}\w ", self.1.work_dir),
+            PathAndInfo::Fallback => write!(f, r"%B{}%~%b ", self.1.work_dir),
         }
     }
 }
